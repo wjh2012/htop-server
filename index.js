@@ -1,24 +1,45 @@
 const express = require('express')
 const puppeteer = require('puppeteer');
 const multer = require('multer');
+const winston = require('winston');
+const cors = require('cors');
+const bodyParser = require('body-parser');
+
 const app = express()
 const port = 3000
+
+const logger = winston.createLogger({
+  level: 'info',
+  format: winston.format.json(),
+  defaultMeta: { service: 'user-service' },
+  transports: [
+    //
+    // - Write all logs with importance level of `error` or less to `error.log`
+    // - Write all logs with importance level of `info` or less to `combined.log`
+    //
+    new winston.transports.File({ filename: 'error.log', level: 'error' }),
+    new winston.transports.File({ filename: 'combined.log' }),
+  ],
+});
 
 // multer 메모리 저장소 설정
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
+app.use(cors({
+  origin: '*', // 모든 출처 허용 옵션. true 를 써도 된다.
+}));
+app.use(bodyParser.raw({ type: 'text/html', limit: '50mb' }));
+
 app.get('/', (req, res) => {
-  console.log('helloworld')
+  logger.info('get data')
   res.send('Hello World!')
 })
 
 app.post('/html-to-pdf', async (req, res) => {
-  console.log('getdata')
   try {
     // 클라이언트로부터 HTML 내용을 받음
-    const { html } = req.body;
-
+    const html  = req.body.toString();
     if (!html) {
       return res.status(400).send({ error: 'HTML content is required' });
     }
