@@ -9,10 +9,12 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 app.get('/', (req, res) => {
+  console.log('helloworld')
   res.send('Hello World!')
 })
 
 app.post('/html-to-pdf', async (req, res) => {
+  console.log('getdata')
   try {
     // 클라이언트로부터 HTML 내용을 받음
     const { html } = req.body;
